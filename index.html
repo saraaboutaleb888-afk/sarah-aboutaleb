@@ -775,7 +775,8 @@ form{display:flex;flex-direction:column;gap:20px;border:1px solid var(--line);bo
     var nameEl=form.querySelector('input[autocomplete="name"]'), mailEl=form.querySelector('input[type="email"]');
     var body={_subject:'New enquiry: '+label+(nameEl&&nameEl.value?' from '+nameEl.value.trim():''),_template:'box',_captcha:'false',Form:label,Details:text};
     if(mailEl&&mailEl.value) body._replyto=mailEl.value.trim();
-    try{ fetch(LEAD_ENDPOINT,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(body)}).catch(function(){}); }catch(_){}
+    var fd=new URLSearchParams(); Object.keys(body).forEach(function(k){fd.append(k,body[k]);});
+    try{ fetch(LEAD_ENDPOINT,{method:'POST',headers:{'Accept':'application/json'},body:fd}).then(function(r){return r.json();}).then(function(j){console.log('lead',j);}).catch(function(err){console.log('lead error',err);}); }catch(_){}
   });
 })();
 </script>
