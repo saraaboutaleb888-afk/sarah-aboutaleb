@@ -763,9 +763,9 @@ form{display:flex;flex-direction:column;gap:20px;border:1px solid var(--line);bo
 </script>
 
 <script>
-/* Every brief is also emailed to Sarah (FormSubmit). WhatsApp still opens as before. */
+/* Every brief is also emailed to Sarah via Web3Forms. WhatsApp still opens as before. */
 (function(){
-  var LEAD_ENDPOINT='https://formsubmit.co/ajax/sarahaboutaleb888@gmail.com';
+  var ACCESS_KEY='76d5019d-44a9-4128-99f2-cab39d24cc4f';
   var LABELS={brief:'Buy / Sell / Invest',cbrief:'Collab',chform:'4-Day Challenge',bkform:'Ebook request',wform:'Women & Money waitlist'};
   document.addEventListener('click',function(e){
     var a=e.target.closest&&e.target.closest('a.send'); if(!a||e.defaultPrevented) return;
@@ -773,10 +773,15 @@ form{display:flex;flex-direction:column;gap:20px;border:1px solid var(--line);bo
     var label=LABELS[form.id]||'Website enquiry';
     var text=''; try{ text=decodeURIComponent((a.href.split('text=')[1]||'')); }catch(_){}
     var nameEl=form.querySelector('input[autocomplete="name"]'), mailEl=form.querySelector('input[type="email"]');
-    var body={_subject:'New enquiry: '+label+(nameEl&&nameEl.value?' from '+nameEl.value.trim():''),_template:'box',_captcha:'false',Form:label,Details:text};
-    if(mailEl&&mailEl.value) body._replyto=mailEl.value.trim();
-    var fd=new URLSearchParams(); Object.keys(body).forEach(function(k){fd.append(k,body[k]);});
-    try{ fetch(LEAD_ENDPOINT,{method:'POST',headers:{'Accept':'application/json'},body:fd}).then(function(r){return r.json();}).then(function(j){console.log('lead',j);}).catch(function(err){console.log('lead error',err);}); }catch(_){}
+    var who=nameEl&&nameEl.value?nameEl.value.trim():'';
+    var fd=new FormData();
+    fd.append('access_key',ACCESS_KEY);
+    fd.append('subject','New enquiry: '+label+(who?' from '+who:''));
+    fd.append('from_name','Sarah Aboutaleb website');
+    fd.append('form',label);
+    fd.append('message',text);
+    if(mailEl&&mailEl.value) fd.append('replyto',mailEl.value.trim());
+    try{ fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Accept':'application/json'},body:fd}).then(function(r){return r.json();}).then(function(j){console.log('lead',j);}).catch(function(err){console.log('lead error',err);}); }catch(_){}
   });
 })();
 </script>
