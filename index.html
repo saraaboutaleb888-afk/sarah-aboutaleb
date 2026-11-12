@@ -186,6 +186,9 @@ form{display:flex;flex-direction:column;gap:20px;border:1px solid var(--line);bo
 .qs li::before{content:"0" counter(q);grid-row:span 2;font-size:20px;font-weight:300;color:var(--accent)}
 .qs b{font-weight:600;font-size:15px;line-height:1.4}
 .qs span{color:var(--mute);font-size:14px}
+.sent{display:flex;flex-direction:column;gap:10px;text-align:center;padding:10px 4px}
+.sent b{font-size:20px;font-weight:600}
+.sent span{color:var(--mute);font-size:15px;line-height:1.5}
 .fine{font-size:12px;color:var(--mute);text-align:center;margin:-8px 0 0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -763,15 +766,17 @@ form{display:flex;flex-direction:column;gap:20px;border:1px solid var(--line);bo
 </script>
 
 <script>
-/* Every brief is also emailed to Sarah via Web3Forms. WhatsApp still opens as before. */
+/* Every brief is emailed to Sarah via Web3Forms first; WhatsApp is offered after, as an option. */
 (function(){
   var ACCESS_KEY='76d5019d-44a9-4128-99f2-cab39d24cc4f';
   var LABELS={brief:'Buy / Sell / Invest',cbrief:'Collab',chform:'4-Day Challenge',bkform:'Ebook request',wform:'Women & Money waitlist'};
   document.addEventListener('click',function(e){
-    var a=e.target.closest&&e.target.closest('a.send'); if(!a||e.defaultPrevented) return;
+    var a=e.target.closest&&e.target.closest('a.send'); if(!a||e.defaultPrevented||a.getAttribute('data-wa')) return;
     var form=a.closest('form'); if(!form) return;
+    e.preventDefault();
+    if(a.getAttribute('data-busy')) return; a.setAttribute('data-busy','1');
     var label=LABELS[form.id]||'Website enquiry';
-    var text=''; try{ text=decodeURIComponent((a.href.split('text=')[1]||'')); }catch(_){}
+    var waHref=a.href, text=''; try{ text=decodeURIComponent((waHref.split('text=')[1]||'')); }catch(_){}
     var nameEl=form.querySelector('input[autocomplete="name"]'), mailEl=form.querySelector('input[type="email"]');
     var who=nameEl&&nameEl.value?nameEl.value.trim():'';
     var fd=new FormData();
@@ -781,7 +786,20 @@ form{display:flex;flex-direction:column;gap:20px;border:1px solid var(--line);bo
     fd.append('form',label);
     fd.append('message',text);
     if(mailEl&&mailEl.value) fd.append('replyto',mailEl.value.trim());
-    try{ fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Accept':'application/json'},body:fd}).then(function(r){return r.json();}).then(function(j){console.log('lead',j);}).catch(function(err){console.log('lead error',err);}); }catch(_){}
+    var oldLabel=a.lastChild.textContent; a.lastChild.textContent=' Sending...'; a.style.opacity='.7';
+    function done(ok){
+      var box=document.createElement('div'); box.className='sent';
+      box.innerHTML= ok
+        ? '<b>Thank you'+(who?', '+who.replace(/[<>&]/g,''):'')+'.</b><span>Your details have reached me. I will personally get back to you very soon.</span>'
+        : '<b>Almost there.</b><span>Your message could not be sent automatically. Please send it to me on WhatsApp instead.</span>';
+      var wa=document.createElement('a'); wa.className='send'; wa.href=waHref; wa.target='_blank'; wa.rel='noopener';
+      wa.setAttribute('data-wa','1'); wa.textContent= ok ? 'Prefer WhatsApp? Message me' : 'Send on WhatsApp';
+      box.appendChild(wa);
+      form.innerHTML=''; form.appendChild(box); box.scrollIntoView({behavior:'smooth',block:'center'});
+    }
+    fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Accept':'application/json'},body:fd})
+      .then(function(r){return r.json();}).then(function(j){done(!!(j&&j.success));})
+      .catch(function(){done(false);});
   });
 })();
 </script>
