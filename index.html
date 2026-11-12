@@ -790,7 +790,7 @@ form{display:flex;flex-direction:column;gap:20px;border:1px solid var(--line);bo
     function done(ok){
       var box=document.createElement('div'); box.className='sent';
       box.innerHTML= ok
-        ? '<b>Thank you'+(who?', '+who.replace(/[<>&]/g,''):'')+'.</b><span>Your details have reached me. I will personally get back to you very soon.</span>'
+        ? '<b>Thank you for your request'+(who?', '+who.replace(/[<>&]/g,''):'')+'.</b><span>I\'m Sarah Aboutaleb, and I review every request personally. I\'ll get back to you as soon as possible.</span><span><em>Sarah</em></span>'
         : '<b>Almost there.</b><span>Your message could not be sent automatically. Please send it to me on WhatsApp instead.</span>';
       var wa=document.createElement('a'); wa.className='send'; wa.href=waHref; wa.target='_blank'; wa.rel='noopener';
       wa.setAttribute('data-wa','1'); wa.textContent= ok ? 'Prefer WhatsApp? Message me' : 'Send on WhatsApp';
